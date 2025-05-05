@@ -1,12 +1,13 @@
+#include "config.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <AudioFileSourceICYStream.h>
 #include <AudioGeneratorMP3.h>
 #include <AudioOutputI2S.h>
 
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
-const char* serverUrl = "http://YOUR_PC_IP:5000/ask";  // Заміни на IP твоєї машини з Flask
+const char* ssid = WIFI_SSID;
+const char* password = WIFI_PASSWORD;
+const char* serverUrl = API_URL;
 
 AudioGeneratorMP3 *mp3;
 AudioFileSourceICYStream *file;
@@ -14,13 +15,23 @@ AudioOutputI2S *out;
 
 void setup() {
   Serial.begin(115200);
+  delay(1000);
 
+  Serial.println("🔌 Підключення до WiFi...");
   WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  int attempts = 0;
+  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
     delay(500);
     Serial.print(".");
+    attempts++;
   }
-  Serial.println("WiFi підключено");
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println("\n✅ WiFi підключено!");
+    Serial.print("IP адреса: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("\n❌ Помилка підключення до WiFi.");
+  }
 
   // Надсилаємо POST-запит
   HTTPClient http;

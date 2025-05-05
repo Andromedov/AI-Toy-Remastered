@@ -1,2 +1,3 @@
 venv/*
 .env
+esp32/config.h
