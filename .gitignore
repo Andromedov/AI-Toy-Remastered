@@ -3,3 +3,5 @@ venv/*
 frontend/.config.json
 esp32/config.h
 .env
+users.db
+__pycache__/
