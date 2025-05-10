@@ -1,3 +1,4 @@
 venv/*
+.vscode/c_cpp_properties.json
 .env
 esp32/config.h
