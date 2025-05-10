@@ -1,0 +1,51 @@
+{
+    "version": 1,
+    "author": "Yevhen Harasymchuk",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-esp32-devkit-v1", "id": "esp32", "top": -44.4, "left": -106.2, "attrs": {} },
+      {
+        "type": "wokwi-pushbutton",
+        "id": "btnLeftHand",
+        "top": -105.7,
+        "left": 70.7,
+        "rotate": 90,
+        "attrs": { "color": "blue" }
+      },
+      {
+        "type": "wokwi-pushbutton",
+        "id": "btnRightHand",
+        "top": 9.5,
+        "left": 13.1,
+        "rotate": 90,
+        "attrs": { "color": "green" }
+      },
+      {
+        "type": "wokwi-pushbutton",
+        "id": "btnLeftFoot",
+        "top": 9.5,
+        "left": 89.9,
+        "rotate": 90,
+        "attrs": { "color": "yellow" }
+      },
+      {
+        "type": "wokwi-pushbutton",
+        "id": "btnRightFoot",
+        "top": -105.7,
+        "left": 13.1,
+        "rotate": 90,
+        "attrs": { "color": "red" }
+      }
+    ],
+    "connections": [
+      [ "btnLeftHand:1.l", "esp32:D21", "blue", [ "v0" ] ],
+      [ "btnRightHand:1.l", "esp32:D19", "green", [ "v0" ] ],
+      [ "btnLeftFoot:1.l", "esp32:D22", "yellow", [ "v0" ] ],
+      [ "btnRightFoot:1.l", "esp32:D23", "red", [ "v0" ] ],
+      [ "btnLeftHand:2.r", "esp32:GND.2", "black", [ "v0" ] ],
+      [ "btnRightHand:2.r", "esp32:GND.2", "black", [ "v0" ] ],
+      [ "btnLeftFoot:2.r", "esp32:GND.2", "black", [ "v0" ] ],
+      [ "btnRightFoot:2.r", "esp32:GND.2", "black", [ "v0" ] ]
+    ],
+    "dependencies": {}
+  }

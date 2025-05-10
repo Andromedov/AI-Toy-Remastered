@@ -1,4 +1,5 @@
 flask
+flet
 gtts
 openai
 python-dotenv

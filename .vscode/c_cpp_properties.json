@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "C:/Users/chane/OneDrive/Документи/PlatformIO/Projects/250508-200715-esp32doit-devkit-v1/.pio/libdeps/esp32doit-devkit-v1/ArduinoJson/src",
+                "C:/Users/chane/OneDrive/Документи/PlatformIO/Projects/250508-200715-esp32doit-devkit-v1/.pio/libdeps/esp32doit-devkit-v1/ChatGPT_Client/src",
+                "C:/Users/chane/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
+                "C:/Users/chane/.platformio/packages/framework-arduinoespressif32/cores/esp32"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "C:\\msys64\\mingw64\\bin\\gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "windows-gcc-x64"
+        }
+    ],
+    "version": 4
+}
