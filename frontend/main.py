@@ -8,6 +8,9 @@ import asyncio
 import platform
 import subprocess
 from pathlib import Path
+from datetime import datetime
+
+timestamp = datetime.now().strftime("%H:%M:%S")
 
 # Завантаження змінних середовища
 load_dotenv()
@@ -39,7 +42,17 @@ class TeddyAI:
         """Завантаження всіх компонентів інтерфейсу"""
         # Завантаження збереженого API ключа
         saved_key = self.load_api_key()
-        
+        self.history_list = ft.ListView(expand=True, spacing=10, height=200)
+
+        self.history_panel = ft.Container(
+            content=ft.Column([
+                ft.Text("Історія", weight=ft.FontWeight.BOLD),
+                self.history_list
+            ]),
+            padding=ft.Padding(10, 10, 10, 10),
+            visible=False
+        )
+
         # Створення UI елементів
         self.api_key_field = ft.TextField(
             label="OpenAI API Key",
@@ -144,6 +157,14 @@ class TeddyAI:
                         ]),
                         padding=ft.Padding(0, 0, 0, 10)
                     ),
+
+                    ft.Container(
+                        content=ft.Column([
+                            ft.Text("Історія", weight=ft.FontWeight.BOLD),
+                            self.history_list
+                        ]),
+                        padding=ft.Padding(0, 0, 0, 10)
+                    ),
                 ]),
                 padding=ft.Padding(10, 10, 10, 10),
                 border_radius=10,
@@ -196,6 +217,14 @@ class TeddyAI:
             self.show_snackbar("❗ Спершу введіть API ключ!")
             return
         
+        self.history_list.controls.insert(0, ft.Row([
+            ft.Icon(ft.Icons.QUESTION_ANSWER, size=18),
+            ft.Text(question, size=14, expand=True),
+            ft.Text(timestamp, size=12, color=ft.Colors.BLUE_GREY),
+            ft.IconButton(icon=ft.Icons.PLAY_ARROW, on_click=lambda e, p=self.audio_file_path: self.play_audio_from_path(p))
+        ]))
+        self.history_panel.visible = True
+        self.page.update()
         # Показуємо прогрес завантаження
         self.progress_bar.visible = True
         self.send_question_btn.disabled = True
@@ -223,7 +252,18 @@ class TeddyAI:
             self.progress_bar.visible = False
             self.send_question_btn.disabled = False
             self.page.update()
-    
+
+    def play_audio_from_path(self, path):
+        try:
+            if platform.system() == "Windows":
+               os.startfile(path)
+            elif platform.system() == "Darwin":
+                subprocess.call(["open", path])
+            else:
+                subprocess.call(["xdg-open", path])
+        except Exception as ex:
+            self.show_snackbar(f"Не вдалося відтворити: {ex}")
+
     def _make_request(self, question, api_key):
         """Виконання HTTP запиту до сервера та збереження аудіо"""
         try:
@@ -267,7 +307,6 @@ class TeddyAI:
         except Exception as e:
             # Інші, непередбачені помилки
             return False, f"Непередбачена помилка: {e}"
-
     
     def show_snackbar(self, message):
         """Показує спливаюче повідомлення"""

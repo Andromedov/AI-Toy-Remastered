@@ -1,6 +1,0 @@
-flask
-flet
-gtts
-openai
-python-dotenv
-better_profanity
