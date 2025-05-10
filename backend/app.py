@@ -1,37 +1,93 @@
 from flask import Flask, request, jsonify, send_file
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_cors import CORS
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base, User, MessageHistory
+from utils import hash_password, check_password
 from gtts import gTTS
 from better_profanity import profanity
 from dotenv import load_dotenv
 import openai
 import os
-import json
 import uuid
 
+# ========== Налаштування ==========
 load_dotenv()
 
-def load_api_key_from_config():
-    try:
-        with open("../frontend/.config.json", "r") as f:
-            config_data = json.load(f)
-            return config_data.get("api_key", "")
-    except Exception as e:
-        print(f"Помилка при читанні .config.json: {e}")
-        return ""
-    
-api_key = load_api_key_from_config()
-
-if not api_key:
-    raise ValueError("API ключ не знайдений! Перевірте .config.json або .env")
-
-openai.api_key = api_key
-
 app = Flask(__name__)
+CORS(app)
+
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+jwt = JWTManager(app)
+
+# Підключення до SQLite
+DATABASE_URL = "sqlite:///users.db"
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
+
 profanity.load_censor_words_from_file("../.wordlist/banword_list.txt")
 
+# ========== Роутери ==========
+
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+    email = data.get("email", "").strip().lower()
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+
+    if not email or not username or not password:
+        return jsonify({"error": "Усі поля обов’язкові"}), 400
+
+    session = Session()
+    if session.query(User).filter_by(email=email).first():
+        session.close()
+        return jsonify({"error": "Користувач з таким email вже існує"}), 400
+
+    new_user = User(
+        email=email,
+        username=username,
+        password_hash=hash_password(password)
+    )
+    session.add(new_user)
+    session.commit()
+    session.close()
+
+    return jsonify({"message": "Користувача зареєстровано успішно!"}), 201
+
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    email = data.get("email", "").strip().lower()
+    password = data.get("password", "").strip()
+
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+
+    if not user or not check_password(password, user.password_hash):
+        session.close()
+        return jsonify({"error": "Невірний email або пароль"}), 401
+
+    token = create_access_token(identity=email)
+    session.close()
+    return jsonify({"token": token})
+
+
 @app.route("/ask", methods=["POST"])
+@jwt_required()
 def ask():
+    email = get_jwt_identity()
     data = request.get_json()
     question = data.get("question", "").strip()
+    
+    # Отримуємо ключ з заголовка
+    api_key = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
+    if not api_key:
+        return jsonify({"error": "API ключ не вказано!"}), 401
+    
+    openai.api_key = api_key
 
     if not question:
         return jsonify({"error": "Порожній запит"}), 400
@@ -39,6 +95,7 @@ def ask():
     if profanity.contains_profanity(question):
         return jsonify({"error": "Запит містить заборонені слова."}), 400
 
+    # ChatGPT API connetion
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
@@ -50,19 +107,50 @@ def ask():
         answer = response.choices[0].message.content.strip()
     except Exception as e:
         return jsonify({"error": f"GPT помилка: {str(e)}"}), 500
-    
-    print(f"GPT відповів: {answer}")
 
+    # Збереження історії
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+    if user:
+        msg = MessageHistory(question=question, user=user)
+        session.add(msg)
+        session.commit()
+    session.close()
+
+    # Генерація MP3
     try:
         tts = gTTS(answer, lang="uk")
         filename = f"response_{uuid.uuid4()}.mp3"
         filepath = os.path.join("responses", filename)
         os.makedirs("responses", exist_ok=True)
         tts.save(filepath)
-        print(f"MP3 збережено в: {filepath}, розмір: {os.path.getsize(filepath)} байт")
         return send_file(filepath, mimetype="audio/mpeg")
     except Exception as e:
         return jsonify({"error": f"TTS помилка: {str(e)}"}), 500
 
+@app.route("/history", methods=["GET"])
+@jwt_required()
+def history():
+    email = get_jwt_identity()
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+
+    if not user:
+        session.close()
+        return jsonify({"error": "Користувача не знайдено"}), 404
+
+    history_data = [
+        {
+            "question": h.question,
+            "timestamp": h.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for h in reversed(user.history)
+    ]
+
+    session.close()
+    return jsonify({"history": history_data})
+
+
+# ========== Запуск ==========
 if __name__ == "__main__":
     app.run(debug=True)
