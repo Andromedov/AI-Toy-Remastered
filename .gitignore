@@ -1,4 +1,5 @@
 venv/*
-.env
-esp32/config.h
 .vscode/*
+frontend/.config.json
+esp32/config.h
+.env

@@ -1,0 +1,5 @@
+Flask
+openai
+gTTS
+python-dotenv
+better_profanity
