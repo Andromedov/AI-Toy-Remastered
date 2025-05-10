@@ -4,10 +4,26 @@ from better_profanity import profanity
 from dotenv import load_dotenv
 import openai
 import os
+import json
 import uuid
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
+
+def load_api_key_from_config():
+    try:
+        with open("../frontend/.config.json", "r") as f:
+            config_data = json.load(f)
+            return config_data.get("api_key", "")
+    except Exception as e:
+        print(f"Помилка при читанні .config.json: {e}")
+        return ""
+    
+api_key = load_api_key_from_config()
+
+if not api_key:
+    raise ValueError("API ключ не знайдений! Перевірте .config.json або .env")
+
+openai.api_key = api_key
 
 app = Flask(__name__)
 profanity.load_censor_words_from_file("../.wordlist/banword_list.txt")
