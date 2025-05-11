@@ -22,16 +22,24 @@ class LoginView:
         self.switch_mode_button = ft.TextButton("Ще не маєш акаунту? Зареєструйся", on_click=self.toggle_mode)
 
         self.page.add(
-            ft.Column([
-                ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
-                self.email_field,
-                self.password_field,
-                self.username_field,
-                self.action_button,
-                self.switch_mode_button,
-                self.status_text
-            ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+            ft.Container(
+                content=ft.Column([
+                    ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
+                    self.email_field,
+                    self.password_field,
+                    self.username_field,
+                    self.action_button,
+                    self.switch_mode_button,
+                    self.status_text
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER),
+                alignment=ft.Alignment(0.0, 0.0),  # <-- саме тут
+                expand=True,
+                padding=20
+            )
         )
+
 
         self.update_fields()
 

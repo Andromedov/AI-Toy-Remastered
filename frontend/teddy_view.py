@@ -43,6 +43,12 @@ class TeddyAI:
         # Завантаження збереженого API ключа
         saved_key = self.load_api_key()
         self.history_list = ft.ListView(expand=True, spacing=10, height=200)
+        self.logout_button = ft.TextButton(
+            text="Вийти",
+            icon=ft.Icons.LOGOUT,
+            on_click=self.logout,
+            style=ft.ButtonStyle(padding=ft.Padding(10, 4, 10, 4))
+        )
 
         self.history_panel = ft.Container(
             content=ft.Column([
@@ -119,11 +125,22 @@ class TeddyAI:
             )
         )
         
+        self.logout_button = ft.TextButton(
+            text="Вийти",
+            icon=ft.Icons.LOGOUT,
+            on_click=self.logout,
+            style=ft.ButtonStyle(padding=ft.Padding(10, 4, 10, 4))
+        )
+
+        
         # Структура компонентів
         self.page.add(
             ft.Container(
                 content=ft.Column([
-                    ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
+                    ft.Row([
+                        ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
+                        self.logout_button
+                    ]),
                     ft.Text("Голосовий асистент на базі GPT", size=16, color=ft.Colors.BLUE_GREY_400),
                     ft.Divider(),
                     
@@ -346,6 +363,28 @@ class TeddyAI:
         """Зупинка аудіо - системний плеєр керується окремо"""
         self.show_snackbar("Керуйте відтворенням у системному плеєрі")
         self.page.update()
+
+    def logout(self, e):
+        """Вихід з облікового запису"""
+        try:
+            if CONFIG_FILE.exists():
+                with open(CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+                data.pop("jwt_token", None)  # Видаляємо токен
+                with open(CONFIG_FILE, "w") as f:
+                    json.dump(data, f)
+        except Exception as ex:
+            print(f"Помилка при видаленні токена: {ex}")
+
+    # Повернення до форми логіну
+        self.page.clean()
+        from login_view import LoginView
+        LoginView(
+            self.page,
+            on_login_success=lambda: TeddyAI(self.page, jwt_token=""),
+            server_url=FLASK_SERVER_URL
+        )
+
 
 def main(page: ft.Page):
     """Головна функція, що ініціалізує застосунок"""
