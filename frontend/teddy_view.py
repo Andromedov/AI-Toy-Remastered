@@ -30,7 +30,7 @@ class TeddyAI:
         self.page.padding = 20
         self.page.scroll = ft.ScrollMode.AUTO
         
-        # Адаптивне налаштування в залежності від платформи
+        # Adaptive customization depending on the platform
         if self.page.platform == "android":
             self.page.window_width = self.page.width
             self.page.window_height = self.page.height
@@ -40,9 +40,11 @@ class TeddyAI:
         
     def load_components(self):
         """Завантаження всіх компонентів інтерфейсу"""
-        # Завантаження збереженого API ключа
+        # Loading a saved API key
         saved_key = self.load_api_key()
         self.history_list = ft.ListView(expand=True, spacing=10, height=200)
+
+        # Creation of logout button
         self.logout_button = ft.TextButton(
             text="Вийти",
             icon=ft.Icons.LOGOUT,
@@ -59,7 +61,7 @@ class TeddyAI:
             visible=False
         )
 
-        # Створення UI елементів
+        # Creation of UI elements
         self.api_key_field = ft.TextField(
             label="OpenAI API Key",
             password=True,
@@ -87,10 +89,7 @@ class TeddyAI:
         )
         
         self.progress_bar = ft.ProgressBar(visible=False)
-        
-        # Замінено Audio на більш примітивне рішення через застарілість компонента
         self.audio_file_path = None
-        # Замість Audio використовуємо кнопки для відкриття аудіо в системному плеєрі
         
         self.audio_controls = ft.Row(
             controls=[
@@ -105,7 +104,7 @@ class TeddyAI:
             visible=False
         )
         
-        # Кнопки
+        # Buttons
         self.save_key_btn = ft.ElevatedButton(
             "Зберегти ключ",
             icon=ft.Icons.SAVE,
@@ -133,7 +132,7 @@ class TeddyAI:
         )
 
         
-        # Структура компонентів
+        # Component structure
         self.page.add(
             ft.Container(
                 content=ft.Column([
@@ -186,7 +185,7 @@ class TeddyAI:
                 padding=ft.Padding(10, 10, 10, 10),
                 border_radius=10,
             ),
-            # Видалено посилання на аудіо-плеєр
+            # Removed link to audio player
         )
         
     def load_api_key(self):
@@ -225,7 +224,7 @@ class TeddyAI:
         question = self.question_field.value.strip()
         api_key = self.api_key_field.value.strip()
         
-        # Перевірка введених даних
+        # Verify the entered data
         if not question:
             self.show_snackbar("❗ Введіть питання!")
             return
@@ -242,14 +241,14 @@ class TeddyAI:
         ]))
         self.history_panel.visible = True
         self.page.update()
-        # Показуємо прогрес завантаження
+        # Show the download progress
         self.progress_bar.visible = True
         self.send_question_btn.disabled = True
         self.status_text.value = "Відправлення запиту..."
         self.page.update()
         
         try:
-            # Асинхронне виконання запиту
+            # Asynchronous query execution
             response_success, error_message = await asyncio.to_thread(self._make_request, question, api_key)
 
             if response_success:
@@ -265,7 +264,7 @@ class TeddyAI:
             self.status_text.value = f"❌ Помилка: {ex}"
             
         finally:
-            # Прибираємо прогрес
+            # Remove progress
             self.progress_bar.visible = False
             self.send_question_btn.disabled = False
             self.page.update()
@@ -284,45 +283,44 @@ class TeddyAI:
     def _make_request(self, question, api_key):
         """Виконання HTTP запиту до сервера та збереження аудіо"""
         try:
-            # Надсилаємо POST-запит до Flask-сервера
+            # Send a POST request to the Flask server
             response = requests.post(
                FLASK_SERVER_URL,
                json={"question": question},
                headers={"Authorization": f"Bearer {self.jwt_token}"},
-               timeout=120  # До 2 хв очікування
+               timeout=120  # 2 minutes
             )
 
             if response.status_code == 200:
-                # Успішна відповідь — зберігаємо аудіо у тимчасовий файл
+                # Successful answer - save audio to a temporary file
                 tmp_dir = Path(tempfile.gettempdir())
                 tmp_path = tmp_dir / "teddyai_response.mp3"
 
                 with open(tmp_path, "wb") as f:
                     f.write(response.content)
 
-                # Зберігаємо шлях для подальшого використання
+                # Save the path for future use
                 self.audio_file_path = str(tmp_path)
 
-                return True, None  # Повертаємо "успіх" та None як відсутність помилки
+                return True, None  # Return “success” and None as no error
 
             else:
-                # Якщо сервер повернув помилку — формуємо текст повідомлення
+                # Generate the error message
                 error_msg = f"Сервер повернув помилку: {response.status_code}"
                 try:
-                    # Якщо у відповіді є пояснення — додаємо
                     error_details = response.json()
                     error_msg += f" - {error_details.get('error', '')}"
                 except (ValueError, KeyError):
-                    pass  # Якщо щось не так із JSON — ігноруємо
+                    pass
 
                 return False, error_msg
 
         except requests.RequestException as e:
-            # Мережева помилка — наприклад, сервер недоступний
+            # Network error - for example, the server is unavailable
             return False, f"Помилка підключення: {e}"
 
         except Exception as e:
-            # Інші, непередбачені помилки
+            # Other, unexpected errors
             return False, f"Непередбачена помилка: {e}"
     
     def show_snackbar(self, message):
@@ -343,14 +341,14 @@ class TeddyAI:
         """Відтворення аудіо в системному плеєрі"""
         if self.audio_file_path:
             try:
-                # Відкриття файлу в системному плеєрі
-                if platform.system() == "Windows":
+                # Open a file in the system player
+                if platform.system() == "Windows": # Windows
                     os.startfile(self.audio_file_path)
                 elif platform.system() == "Darwin":  # macOS
                     subprocess.call(["open", self.audio_file_path])
-                else:  # Linux і Android
+                else:  # Linux & Android
                     subprocess.call(["xdg-open", self.audio_file_path])
-            except Exception as ex:
+            except Exception as ex: # Error ¯\_(ツ)_/¯
                 self.show_snackbar(f"Помилка відтворення: {ex}")
         self.page.update()
     
@@ -370,13 +368,13 @@ class TeddyAI:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
                     data = json.load(f)
-                data.pop("jwt_token", None)  # Видаляємо токен
+                data.pop("jwt_token", None)  # Remove token
                 with open(CONFIG_FILE, "w") as f:
                     json.dump(data, f)
         except Exception as ex:
             print(f"Помилка при видаленні токена: {ex}")
 
-    # Повернення до форми логіну
+    # Return to login page
         self.page.clean()
         from login_view import LoginView
         LoginView(
@@ -388,4 +386,4 @@ class TeddyAI:
 
 def main(page: ft.Page):
     """Головна функція, що ініціалізує застосунок"""
-    TeddyAI(page)  # Створюємо екземпляр без збереження референсу
+    TeddyAI(page)  # Create an instance without saving the reference

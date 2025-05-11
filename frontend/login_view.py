@@ -34,7 +34,7 @@ class LoginView:
                 ],
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-                alignment=ft.Alignment(0.0, 0.0),  # <-- саме тут
+                alignment=ft.Alignment(0.0, 0.0),
                 expand=True,
                 padding=20
             )
