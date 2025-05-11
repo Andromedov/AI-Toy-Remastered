@@ -1,7 +1,17 @@
+# python
 venv/*
-.vscode/*
-frontend/.config.json
-esp32/config.h
-.env
-users.db
 __pycache__/
+
+# vs code files
+.vscode/*
+*.code-workspace
+
+# project configuration files
+frontend/.config.json
+.env
+
+# database
+users.db
+
+# simulation configuration file
+esp32/config.h
