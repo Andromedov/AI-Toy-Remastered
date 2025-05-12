@@ -232,7 +232,7 @@ class TeddyAI:
     def save_key(self, e):
         asyncio.run(self._save_key_async(e))
 
-    async def _save_key_async(self, e):
+    async def _save_key_async(self, _):
         if not self.api_key_field.value:
             self.show_snackbar("Введіть API ключ!")
             return
