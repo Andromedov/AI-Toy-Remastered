@@ -37,8 +37,10 @@ flet run main.py -d
 
 ```
 SERVER_URL=http://127.0.0.1:5000
-JWT_SECRET=your_very_secret_key # Щоб створити ключ використайте наступну команду (необхідний NodeJS):
-# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# ⬇️ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+JWT_SECRET=your_very_secret_key
+# ⬇️ https://www.google.com/recaptcha/admin/create 
+RECAPTCHA_SECRET_KEY=your_google_recaptcha_secret_key
 ```
 
 ---
