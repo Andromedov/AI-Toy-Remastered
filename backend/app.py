@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, send_file
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, User, MessageHistory
@@ -17,6 +19,7 @@ load_dotenv("../.env")
 
 app = Flask(__name__)
 CORS(app)
+limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "30 per minute"])
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
@@ -40,10 +43,17 @@ def register():
     if not email or not username or not password:
         return jsonify({"error": "Усі поля обов’язкові"}), 400
 
+    if len(password) < 8:
+        return jsonify({"error": "Пароль має містити щонайменше 8 символів"}), 400
+
     session = Session()
     if session.query(User).filter_by(email=email).first():
         session.close()
         return jsonify({"error": "Користувач з таким email вже існує"}), 400
+
+    if session.query(User).filter_by(username=username).first():
+        session.close()
+        return jsonify({"error": "Ім’я користувача вже зайняте"}), 400
 
     new_user = User(
         email=email,
@@ -58,6 +68,7 @@ def register():
 
 
 @app.route("/login", methods=["POST"])
+@limiter.limit("5 per minute")  # Protection from brute-force
 def login():
     data = request.get_json()
     login_input = data.get("email", "").strip().lower()
@@ -70,7 +81,7 @@ def login():
 
     if not user or not check_password(password, user.password_hash):
         session.close()
-        return jsonify({"error": "Невірний email або пароль"}), 401
+        return jsonify({"error": "Невірний email/username або пароль"}), 401
 
     token = create_access_token(identity=user.email)
     session.close()
