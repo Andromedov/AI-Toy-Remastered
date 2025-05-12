@@ -129,14 +129,6 @@ class TeddyAI:
             )
         )
         
-        self.logout_button = ft.TextButton(
-            text="Вийти",
-            icon=ft.Icons.LOGOUT,
-            on_click=self.logout,
-            style=ft.ButtonStyle(padding=ft.Padding(10, 4, 10, 4))
-        )
-
-        
         # Component structure
         self.page.add(
             ft.Container(
@@ -205,8 +197,7 @@ class TeddyAI:
             print(f"Помилка читання ключа: {e}")
         return ""
     
-    def save_api_key(self, api_key):
-        """Збереження ключа локально та на сервер"""
+    async def save_api_key(self, api_key):
         try:
             fernet = get_fernet()
             encrypted_key = fernet.encrypt(api_key.encode()).decode()
@@ -227,6 +218,10 @@ class TeddyAI:
             )
             if response.status_code == 200:
                 return True
+            elif response.status_code == 401:
+                await self.auto_logout_and_login()
+                self.jwt_token = ""
+                return False
             else:
                 print("❌ Помилка при надсиланні ключа:", response.text)
                 return False
@@ -234,13 +229,15 @@ class TeddyAI:
             print("❌ Помилка збереження ключа:", e)
             return False
 
-    
     def save_key(self, e):
+        asyncio.run(self._save_key_async(e))
+
+    async def _save_key_async(self, e):
         if not self.api_key_field.value:
             self.show_snackbar("Введіть API ключ!")
             return
             
-        if self.save_api_key(self.api_key_field.value):
+        if await self.save_api_key(self.api_key_field.value):
             self.show_snackbar("🔐 Ключ успішно збережено!")
         else:
             self.show_snackbar("❌ Помилка збереження ключа")
@@ -274,16 +271,18 @@ class TeddyAI:
         
         try:
             # Asynchronous query execution
-            response_success, error_message = await asyncio.to_thread(self._make_request, question, api_key)
+            response_result, error_message = await asyncio.to_thread(self._make_request, question, api_key)
 
-            if response_success:
+            if response_result == True:
                 self.status_text.value = "✅ Відповідь отримана"
                 self.audio_controls.visible = True
                 self.enable_audio_controls(True)
+            elif response_result == "unauthorized":
+                await self.auto_logout_and_login()
             else:
                 self.status_text.value = "❌ Не вдалося отримати відповідь"
-            if error_message:
-                self.show_snackbar(error_message)
+                if error_message:
+                    self.show_snackbar(error_message)
                 
         except Exception as ex:
             self.status_text.value = f"❌ Помилка: {ex}"
@@ -329,10 +328,7 @@ class TeddyAI:
                 return True, None  # Return “success” and None as no error
             
             if response.status_code == 401:
-                self.status_text.value = "⚠️ Сесія завершена. Повторний вхід..."
-                self.page.update()
-                asyncio.run(self.auto_logout_and_login())
-                return False, "Необхідна повторна авторизація"
+                return "unauthorized", "Сесія завершена або токен недійсний"
 
             else:
                 # Generate the error message
@@ -358,8 +354,7 @@ class TeddyAI:
         self.page.snackbar = ft.SnackBar(
             content=ft.Text(message),
             action="OK",
-            show_close_icon=True,
-            behavior=ft.SnackBarBehavior.FLOATING
+            duration=3000,
         )
         self.page.snackbar.open = True
         self.page.update()
@@ -391,6 +386,18 @@ class TeddyAI:
         self.show_snackbar("Керуйте відтворенням у системному плеєрі")
         self.page.update()
 
+    def show_login_view(self):
+        from login_view import LoginView
+        self.page.clean()
+        self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
+
+        def on_login_success():
+            self.page.clean()
+            TeddyAI(self.page, jwt_token="")
+
+        LoginView(self.page, on_login_success=on_login_success, server_url=FLASK_SERVER_URL)
+
+
     def logout(self, e):
         try:
             if CONFIG_FILE.exists():
@@ -401,6 +408,8 @@ class TeddyAI:
                     json.dump(data, f)
         except Exception as ex:
             print(f"Помилка при видаленні токена: {ex}")
+
+        self.show_login_view()
 
     async def auto_logout_and_login(self):
         try:
@@ -414,24 +423,9 @@ class TeddyAI:
 
             # Повертаємось до екрана входу
             await asyncio.sleep(1)
-            self.page.clean()
-            from login_view import LoginView
-            LoginView(
-                self.page,
-                on_login_success=lambda: TeddyAI(self.page, jwt_token=""),
-                server_url=FLASK_SERVER_URL
-            )
+            self.show_login_view()
         except Exception as ex:
             print(f"Помилка при auto-logout: {ex}")
-
-    # Return to login page
-        self.page.clean()
-        from login_view import LoginView
-        LoginView(
-            self.page,
-            on_login_success=lambda: TeddyAI(self.page, jwt_token=""),
-            server_url=FLASK_SERVER_URL
-        )
 
 
 def main(page: ft.Page):

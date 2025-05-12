@@ -11,6 +11,7 @@ from gtts import gTTS
 from better_profanity import profanity
 from dotenv import load_dotenv
 from encryption import encrypt_api_key, decrypt_api_key
+from datetime import timedelta
 import openai
 import os
 import uuid
@@ -23,6 +24,7 @@ CORS(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "30 per minute"])
 
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(seconds=30) - For testing
 jwt = JWTManager(app)
 
 # Connection to SQLite
