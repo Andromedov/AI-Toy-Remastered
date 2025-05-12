@@ -72,7 +72,6 @@ ENCRYPTION_SECRET=your_encryption_secret_key_here
     │   ├── db_setup.py
     │   ├── encryption.py
     │   ├── models.py
-    │   ├── requirements.txt
     │   └── utils.py
     ├── frontend/
     │   ├── login_view.py
@@ -81,6 +80,7 @@ ENCRYPTION_SECRET=your_encryption_secret_key_here
     ├── .wordlist/
     │   └── banword_list.txt
     ├── .env
+    ├── requirements.txt
     ├── README.md
     ├── install.bat
     └── install.sh
