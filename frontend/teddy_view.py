@@ -9,12 +9,22 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 
 timestamp = datetime.now().strftime("%H:%M:%S")
 
 load_dotenv("../.env")
 CONFIG_FILE = Path(".config.json")
+FERNET_FILE = Path(".fernet.key")
 FLASK_SERVER_URL = os.getenv("SERVER_URL")
+
+def get_fernet():
+    if FERNET_FILE.exists():
+        key = FERNET_FILE.read_text().strip()
+    else:
+        key = Fernet.generate_key().decode()
+        FERNET_FILE.write_text(key)
+    return Fernet(key.encode())
 
 class TeddyAI:
     def __init__(self, page: ft.Page, jwt_token: str):
@@ -187,7 +197,10 @@ class TeddyAI:
         try:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
-                    return json.load(f).get("api_key", "")
+                    encrypted_key = json.load(f).get("api_key", "")
+                if encrypted_key:
+                    fernet = get_fernet()
+                    return fernet.decrypt(encrypted_key.encode()).decode()
         except Exception as e:
             print(f"Помилка читання ключа: {e}")
         return ""
@@ -195,10 +208,13 @@ class TeddyAI:
     def save_api_key(self, api_key):
         """Збереження ключа локально та на сервер"""
         try:
+            fernet = get_fernet()
+            encrypted_key = fernet.encrypt(api_key.encode()).decode()
+
             # Локально
             with open(CONFIG_FILE, "r") as f:
                 data = json.load(f)
-            data["api_key"] = api_key
+            data["api_key"] = encrypted_key
             with open(CONFIG_FILE, "w") as f:
                 json.dump(data, f)
 

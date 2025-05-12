@@ -7,8 +7,9 @@ __pycache__/
 *.code-workspace
 
 # project configuration files
-frontend/.config.json
+.config.json
 .env
+.fernet.key
 
 # database
 users.db

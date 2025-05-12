@@ -2,8 +2,18 @@ import flet as ft
 import requests
 import json
 from pathlib import Path
+from cryptography.fernet import Fernet
 
 CONFIG_FILE = Path(".config.json")
+FERNET_FILE = Path(".fernet.key")
+
+def get_fernet():
+    if FERNET_FILE.exists():
+        key = FERNET_FILE.read_text().strip()
+    else:
+        key = Fernet.generate_key().decode()
+        FERNET_FILE.write_text(key)
+    return Fernet(key.encode())
 
 class LoginView:
     def __init__(self, page: ft.Page, on_login_success, server_url: str):
@@ -120,7 +130,8 @@ class LoginView:
             data["email"] = email
             data["jwt_token"] = jwt
             if api_key:
-                data["api_key"] = api_key
+                fernet = get_fernet()
+                data["api_key"] = fernet.encrypt(api_key.encode()).decode()
 
             with open(CONFIG_FILE, "w") as f:
                 json.dump(data, f)
