@@ -11,7 +11,7 @@ class User(Base):
     username = Column(String(50), nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(128), nullable=False)
-    api_key_encrypted = Column(String, nullable=True)
+    api_key_encrypted = Column(Text, nullable=True)
 
     history = relationship("MessageHistory", back_populates="user")
 

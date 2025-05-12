@@ -96,7 +96,7 @@ ENCRYPTION_SECRET=your_encryption_secret_key_here
 * [ ] Збереження історії на сервері + відображення в інтерфейсі
 * [ ] Мобільна версія як APK (Flet + Android Studio)
 * [ ] Розширення TTS/ASR можливостей
-* [ ] Підключення до бази даних SQLite
+* [ ] Підключення до бази даних SQLite або MySQL (MariaDB)
 
 ---
 
