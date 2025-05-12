@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from models import Base
 
-# Шлях до SQLite файлу
+# Path to SQLite file
 DATABASE_URL = "sqlite:///users.db"
 
 def init_db():

@@ -60,17 +60,19 @@ def register():
 @app.route("/login", methods=["POST"])
 def login():
     data = request.get_json()
-    email = data.get("email", "").strip().lower()
+    login_input = data.get("email", "").strip().lower()
     password = data.get("password", "").strip()
 
     session = Session()
-    user = session.query(User).filter_by(email=email).first()
+    user = session.query(User).filter(
+        (User.email == login_input) | (User.username == login_input)
+    ).first()
 
     if not user or not check_password(password, user.password_hash):
         session.close()
         return jsonify({"error": "Невірний email або пароль"}), 401
 
-    token = create_access_token(identity=email)
+    token = create_access_token(identity=user.email)
     session.close()
     return jsonify({"token": token})
 
