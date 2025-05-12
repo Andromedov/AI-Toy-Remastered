@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 import openai
 import os
 import uuid
-import requests
 
 # ========== Settings ==========
 load_dotenv("../.env")
@@ -74,23 +73,6 @@ def login():
     data = request.get_json()
     login_input = data.get("email", "").strip().lower()
     password = data.get("password", "").strip()
-    captcha_token = data.get("captcha_token")
-
-    # CAPTCHA Verification
-    if not captcha_token:
-        return jsonify({"error": "CAPTCHA не пройдена"}), 400
-
-    verify_url = "https://www.google.com/recaptcha/api/siteverify"
-    secret_key = os.getenv("RECAPTCHA_SECRET_KEY")
-
-    response = requests.post(verify_url, data={
-        "secret": secret_key,
-        "response": captcha_token
-    })
-    result = response.json()
-
-    if not result.get("success"):
-        return jsonify({"error": "CAPTCHA недійсна"}), 400
 
     session = Session()
     user = session.query(User).filter(

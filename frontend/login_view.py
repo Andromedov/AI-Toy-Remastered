@@ -2,7 +2,6 @@ import flet as ft
 import requests
 import json
 from pathlib import Path
-from flet_webview import WebView
 
 CONFIG_FILE = Path(".config.json")
 
@@ -22,27 +21,6 @@ class LoginView:
         self.action_button = ft.ElevatedButton("Увійти", on_click=self.authenticate)
         self.switch_mode_button = ft.TextButton("Ще не маєш акаунту? Зареєструйся", on_click=self.toggle_mode)
 
-        self.captcha_token = ""
-
-        captcha_path = Path("./static/captcha.html").resolve().as_uri()
-        self.captcha_view = WebView(
-            url=captcha_path,
-            height=300,
-            width=400,
-            visible=False
-        )
-
-        self.captcha_btn = ft.ElevatedButton(
-            text="Пройти CAPTCHA",
-            icon=ft.Icons.SECURITY,
-            on_click=self.show_captcha
-        )
-
-        self.refresh_token_btn = ft.ElevatedButton(
-            text="🔄 Отримати токен",
-            on_click=self.read_captcha_token
-        )
-
         self.page.add(
             ft.Container(
                 content=ft.Column([
@@ -50,11 +28,6 @@ class LoginView:
                     self.email_field,
                     self.password_field,
                     self.username_field,
-                    ft.Row([
-                        self.captcha_btn,
-                        self.refresh_token_btn
-                    ], alignment=ft.MainAxisAlignment.CENTER),
-                    self.captcha_view,
                     self.action_button,
                     self.switch_mode_button,
                     self.status_text
@@ -92,11 +65,7 @@ class LoginView:
 
         try:
             if self.is_login_mode:
-                r = requests.post(f"{self.server_url}/login", json={
-                    "email": email, 
-                    "password": password,
-                    "captcha_token": self.captcha_token
-                })
+                r = requests.post(f"{self.server_url}/login", json={"email": email, "password": password})
             else:
                 r = requests.post(f"{self.server_url}/register", json={
                     "email": email, "password": password, "username": username
@@ -120,15 +89,6 @@ class LoginView:
 
         self.page.update()
 
-    def show_snackbar(self, message):
-        self.page.snack_bar = ft.SnackBar(
-            content=ft.Text(message),
-            action="OK"
-        )
-        self.page.snack_bar.open = True
-        self.page.update()
-
-
     def save_config(self, email, jwt):
         try:
             if CONFIG_FILE.exists():
@@ -144,20 +104,3 @@ class LoginView:
                 json.dump(data, f)
         except Exception as e:
             print(f"Не вдалося зберегти токен: {e}")
-    
-    def show_captcha(self, e):
-        self.captcha_view.visible = True
-        self.page.update()
-
-    def read_captcha_token(self, e):
-        import pyperclip
-        try:
-            token = pyperclip.paste()
-            if token.startswith("03"):
-                self.captcha_token = token
-                self.show_snackbar("✅ Токен зчитано!")
-            else:
-                self.show_snackbar("❌ Токен не знайдено. Скопіюйте його вручну.")
-        except Exception as ex:
-            self.show_snackbar(f"⚠️ Помилка зчитування токена: {ex}")
-
