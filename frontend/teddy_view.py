@@ -105,13 +105,10 @@ class TeddyAI:
         )
         
         # Buttons
-        self.save_key_btn = ft.ElevatedButton(
-            "Зберегти ключ",
+        self.save_key_btn = ft.IconButton(
             icon=ft.Icons.SAVE,
+            tooltip="Зберегти ключ",
             on_click=self.save_key,
-            style=ft.ButtonStyle(
-                shape=ft.RoundedRectangleBorder(radius=8)
-            )
         )
         
         self.send_question_btn = ft.ElevatedButton(

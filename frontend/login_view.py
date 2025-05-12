@@ -11,23 +11,23 @@ class LoginView:
         self.on_login_success = on_login_success
         self.server_url = server_url
 
-        self.email_field = ft.TextField(label="Email", keyboard_type="email")
+        self.email_field = ft.TextField()
+        self.username_field = ft.TextField()
         self.password_field = ft.TextField(label="Пароль", password=True, can_reveal_password=True)
-        self.username_field = ft.TextField(label="Ім’я користувача (реєстрація)")
 
         self.status_text = ft.Text("")
         self.is_login_mode = True
 
-        self.action_button = ft.ElevatedButton("Увійти", on_click=self.authenticate)
-        self.switch_mode_button = ft.TextButton("Ще не маєш акаунту? Зареєструйся", on_click=self.toggle_mode)
+        self.action_button = ft.ElevatedButton(text="...", on_click=self.authenticate)
+        self.switch_mode_button = ft.TextButton(on_click=self.toggle_mode)
 
         self.page.add(
             ft.Container(
                 content=ft.Column([
                     ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
                     self.email_field,
-                    self.password_field,
                     self.username_field,
+                    self.password_field,
                     self.action_button,
                     self.switch_mode_button,
                     self.status_text
@@ -44,9 +44,17 @@ class LoginView:
         self.update_fields()
 
     def update_fields(self):
-        self.username_field.visible = not self.is_login_mode
-        self.action_button.text = "Увійти" if self.is_login_mode else "Зареєструватись"
-        self.switch_mode_button.text = "Ще не маєш акаунту? Зареєструйся" if self.is_login_mode else "У тебе вже є акаунт? Увійди"
+        if self.is_login_mode:
+            self.email_field.label = "Ім'я користувача або Email"
+            self.username_field.visible = False
+            self.action_button.text = "Увійти"
+            self.switch_mode_button.text = "Ще не маєш акаунту? Зареєструйся"
+        else:
+            self.email_field.label = "Email"
+            self.username_field.label = "Ім’я користувача"
+            self.username_field.visible = True
+            self.action_button.text = "Зареєструватись"
+            self.switch_mode_button.text = "У тебе вже є акаунт? Увійди"
         self.page.update()
 
     def toggle_mode(self, e):

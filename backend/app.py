@@ -37,7 +37,7 @@ profanity.load_censor_words_from_file("../.wordlist/banword_list.txt")
 def register():
     data = request.get_json()
     email = data.get("email", "").strip().lower()
-    username = data.get("username", "").strip()
+    username = data.get("username", "").strip().lower()
     password = data.get("password", "").strip()
 
     if not email or not username or not password:
