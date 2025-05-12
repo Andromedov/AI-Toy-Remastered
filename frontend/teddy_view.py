@@ -320,13 +320,15 @@ class TeddyAI:
             # Other, unexpected errors
             return False, f"Непередбачена помилка: {e}"
     
+    # TODO: Fix Snackbar if not work 
     def show_snackbar(self, message):
-        """Показує спливаюче повідомлення"""
-        self.page.snack_bar = ft.SnackBar(
+        self.page.snackbar = ft.SnackBar(
             content=ft.Text(message),
-            action="OK"
+            action="OK",
+            show_close_icon=True,
+            behavior=ft.SnackBarBehavior.FLOATING
         )
-        self.page.snack_bar.open = True
+        self.page.snackbar.open = True
         self.page.update()
     
     def enable_audio_controls(self, enabled=True):
