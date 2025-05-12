@@ -54,6 +54,20 @@ def save_api_key():
 
     return jsonify({"message": "Ключ збережено"}), 200
 
+@app.route("/api-key", methods=["GET"])
+@jwt_required()
+def get_api_key():
+    email = get_jwt_identity()
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+    if not user or not user.api_key_encrypted:
+        session.close()
+        return jsonify({"api_key": ""}), 200
+    decrypted = decrypt_api_key(user.api_key_encrypted)
+    session.close()
+    return jsonify({"api_key": decrypted}), 200
+
+
 # ========== Routers ==========
 
 @app.route("/register", methods=["POST"])

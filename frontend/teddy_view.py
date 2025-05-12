@@ -24,7 +24,6 @@ class TeddyAI:
         self.load_components()
         
     def setup_page(self):
-        """Налаштування сторінки"""
         self.page.title = "TeddyAI"
         self.page.theme_mode = ft.ThemeMode.SYSTEM
         self.page.padding = 20
@@ -39,7 +38,6 @@ class TeddyAI:
             self.page.window_height = 650
         
     def load_components(self):
-        """Завантаження всіх компонентів інтерфейсу"""
         # Loading a saved API key
         saved_key = self.load_api_key()
         self.history_list = ft.ListView(expand=True, spacing=10, height=200)
@@ -186,7 +184,6 @@ class TeddyAI:
         )
         
     def load_api_key(self):
-        """Завантаження API ключа з конфігураційного файлу"""
         try:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
@@ -196,17 +193,33 @@ class TeddyAI:
         return ""
     
     def save_api_key(self, api_key):
-        """Збереження API ключа в конфігураційний файл"""
+        """Збереження ключа локально та на сервер"""
         try:
+            # Локально
+            with open(CONFIG_FILE, "r") as f:
+                data = json.load(f)
+            data["api_key"] = api_key
             with open(CONFIG_FILE, "w") as f:
-                json.dump({"api_key": api_key}, f)
-            return True
+                json.dump(data, f)
+
+            # На сервер
+            response = requests.post(
+                f"{FLASK_SERVER_URL}/save_api_key",
+                headers={"Authorization": f"Bearer {self.jwt_token}"},
+                json={"api_key": api_key},
+                timeout=10
+            )
+            if response.status_code == 200:
+                return True
+            else:
+                print("❌ Помилка при надсиланні ключа:", response.text)
+                return False
         except Exception as e:
-            print(f"Помилка збереження ключа: {e}")
+            print("❌ Помилка збереження ключа:", e)
             return False
+
     
     def save_key(self, e):
-        """Обробник події збереження ключа"""
         if not self.api_key_field.value:
             self.show_snackbar("Введіть API ключ!")
             return
@@ -217,7 +230,6 @@ class TeddyAI:
             self.show_snackbar("❌ Помилка збереження ключа")
     
     async def send_question(self, e):
-        """Обробник події відправки питання"""
         question = self.question_field.value.strip()
         api_key = self.api_key_field.value.strip()
         
@@ -278,11 +290,10 @@ class TeddyAI:
             self.show_snackbar(f"Не вдалося відтворити: {ex}")
 
     def _make_request(self, question, api_key):
-        """Виконання HTTP запиту до сервера та збереження аудіо"""
         try:
             # Send a POST request to the Flask server
             response = requests.post(
-               FLASK_SERVER_URL,
+               f"{FLASK_SERVER_URL}/ask",
                json={"question": question},
                headers={"Authorization": f"Bearer {self.jwt_token}"},
                timeout=120  # 2 minutes
@@ -332,12 +343,10 @@ class TeddyAI:
         self.page.update()
     
     def enable_audio_controls(self, enabled=True):
-        """Вмикає/вимикає кнопки керування аудіо"""
         for btn in self.audio_controls.controls:
             btn.disabled = not enabled
     
     def play_audio(self, _):
-        """Відтворення аудіо в системному плеєрі"""
         if self.audio_file_path:
             try:
                 # Open a file in the system player
@@ -350,19 +359,17 @@ class TeddyAI:
             except Exception as ex: # Error ¯\_(ツ)_/¯
                 self.show_snackbar(f"Помилка відтворення: {ex}")
         self.page.update()
-    
+
+    # TODO: Fix pause and stop audio players
     def pause_audio(self, _):
-        """Пауза аудіо - системний плеєр керується окремо"""
         self.show_snackbar("Керуйте відтворенням у системному плеєрі")
         self.page.update()
     
     def stop_audio(self, _):
-        """Зупинка аудіо - системний плеєр керується окремо"""
         self.show_snackbar("Керуйте відтворенням у системному плеєрі")
         self.page.update()
 
     def logout(self, e):
-        """Вихід з облікового запису"""
         try:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
@@ -384,5 +391,4 @@ class TeddyAI:
 
 
 def main(page: ft.Page):
-    """Головна функція, що ініціалізує застосунок"""
-    TeddyAI(page)  # Create an instance without saving the reference
+    TeddyAI(page)
