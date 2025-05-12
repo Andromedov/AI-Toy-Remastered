@@ -135,11 +135,11 @@ def ask():
     question = data.get("question", "").strip()
     
     # Get the key from the header
-    api_key = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
-    if not api_key:
+    openai_key = request.headers.get("X-OpenAI-Key", "").strip()
+    if not openai_key:
         return jsonify({"error": "API ключ не вказано!"}), 401
     
-    openai.api_key = api_key
+    openai.api_key = openai_key
 
     if not question:
         return jsonify({"error": "Порожній запит"}), 400

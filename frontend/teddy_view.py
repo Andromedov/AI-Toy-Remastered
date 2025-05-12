@@ -310,7 +310,10 @@ class TeddyAI:
             response = requests.post(
                f"{FLASK_SERVER_URL}/ask",
                json={"question": question},
-               headers={"Authorization": f"Bearer {self.jwt_token}"},
+               headers={
+                   "Authorization": f"Bearer {self.jwt_token}",
+                   "X-OpenAI-Key": api_key
+                },
                timeout=120  # 2 minutes
             )
 
@@ -392,8 +395,15 @@ class TeddyAI:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
         def on_login_success():
-            self.page.clean()
-            TeddyAI(self.page, jwt_token="")
+            try:
+                with open(CONFIG_FILE, "r") as f:
+                    config = json.load(f)
+                    token = config.get("jwt_token", "")
+                    if token:
+                        self.page.clean()
+                        TeddyAI(self.page, jwt_token=token)
+            except Exception as ex:
+                print("❌ Не вдалося прочитати токен після логіну:", ex)
 
         LoginView(self.page, on_login_success=on_login_success, server_url=FLASK_SERVER_URL)
 
