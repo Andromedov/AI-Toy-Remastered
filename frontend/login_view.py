@@ -86,7 +86,19 @@ class LoginView:
 
             if r.status_code == 200:
                 token = r.json()["token"]
-                self.save_config(email=email, jwt=token)
+
+                key = ""
+                try:
+                    key_resp = requests.get(
+                        f"{self.server_url}/api-key",
+                        headers={"Authorization": f"Bearer {token}"}
+                    )
+                    if key_resp.status_code == 200:
+                        key = key_resp.json().get("api_key", "")
+                except Exception as ex:
+                    print("⚠️ Не вдалося отримати ключ:", ex)
+                    
+                self.save_config(email=email, jwt=token, api_key=key)
                 self.status_text.value = "✅ Успішний вхід!"
                 self.page.clean()
                 self.on_login_success()
@@ -97,7 +109,7 @@ class LoginView:
 
         self.page.update()
 
-    def save_config(self, email, jwt):
+    def save_config(self, email, jwt, api_key=None):
         try:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
@@ -107,6 +119,8 @@ class LoginView:
 
             data["email"] = email
             data["jwt_token"] = jwt
+            if api_key:
+                data["api_key"] = api_key
 
             with open(CONFIG_FILE, "w") as f:
                 json.dump(data, f)

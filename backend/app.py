@@ -10,6 +10,7 @@ from utils import hash_password, check_password
 from gtts import gTTS
 from better_profanity import profanity
 from dotenv import load_dotenv
+from encryption import encrypt_api_key, decrypt_api_key
 import openai
 import os
 import uuid
@@ -30,6 +31,28 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 profanity.load_censor_words_from_file("../.wordlist/banword_list.txt")
+
+# ========== Save API Key to DB ==========
+
+@app.route("/save_api_key", methods=["POST"])
+@jwt_required()
+def save_api_key():
+    email = get_jwt_identity()
+    data = request.get_json()
+    api_key = data.get("api_key", "").strip()
+
+    if not api_key:
+        return jsonify({"error": "Порожній API ключ"}), 400
+
+    encrypted = encrypt_api_key(api_key)
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+    if user:
+        user.api_key_encrypted = encrypted
+        session.commit()
+    session.close()
+
+    return jsonify({"message": "Ключ збережено"}), 200
 
 # ========== Routers ==========
 
