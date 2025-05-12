@@ -15,13 +15,20 @@ TeddyAI — на разі, це мультимодульний застосун�
 
 ## 🛠️ Встановлення
 
+### ⚠️ Перед початком використання
+```bash
+# Linux or MacOS
+chmod +x install.sh
+./install.sh
+
+# Windows
+./install.bat
+```
 ### 🌐 Backend (Flask)
 
 ```bash
 cd backend
-python -m venv venv
 venv\Scripts\activate  # Linux/macOS: source venv/bin/activate
-pip install -r requirements.txt
 python ./app.py
 ```
 
@@ -29,17 +36,19 @@ python ./app.py
 
 ```bash
 cd frontend
-pip install -r requirements.txt
 flet run main.py -d
 ```
 
-> **Примітка:** створіть файл `.env` у `frontend/` та `backend/`:
+> **Примітка:** створіть файл `.env`, або ж створіть його за допомогою `install` файлу:
 
 ```
+# === TeddyAI Environment ===
 # ⬇️ or other URL for server
 SERVER_URL=http://127.0.0.1:5000
 # ⬇️ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 JWT_SECRET=your_very_secret_key
+# ⬇️ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+ENCRYPTION_SECRET=your_encryption_secret_key_here
 ```
 
 ---
@@ -57,20 +66,25 @@ JWT_SECRET=your_very_secret_key
 ## 🔧 Структура проекту
 
 ```
-TeddyAI/
-├── backend/
-│   ├── app.py
-│   ├── db.py
-│   ├── models.py
-│   └── auth.py
-├── frontend/
-│   ├── .config.json
-│   ├── main.py
-│   ├── teddy_view.py
-│   └── login_view.py
-├── .wordlist/
-│   └── banword_list.txt
-└── .env
+└── Andromedov/AI-Toy-Remastered/
+    ├── backend/
+    │   ├── app.py
+    │   ├── db_setup.py
+    │   ├── encryption.py
+    │   ├── models.py
+    │   ├── requirements.txt
+    │   └── utils.py
+    ├── frontend/
+    │   ├── login_view.py
+    │   ├── main.py
+    │   └── teddy_view.py
+    ├── .wordlist/
+    │   └── banword_list.txt
+    ├── .env
+    ├── README.md
+    ├── install.bat
+    └── install.sh
+
 ```
 
 ---

@@ -1,0 +1,13 @@
+flet
+requests
+flask
+flask-jwt-extended
+flask-cors
+flask-limiter
+python-dotenv
+sqlalchemy
+bcrypt
+gtts
+better_profanity
+cryptography
+pyperclip
