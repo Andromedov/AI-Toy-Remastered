@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>reCAPTCHA</title>
+  <script src="https://www.google.com/recaptcha/api.js"></script>
+  <script>
+    function onSubmit(token) {
+      // Save token in localStorage
+      localStorage.setItem("recaptcha_token", token);
+      document.getElementById("status").innerText = "✅ CAPTCHA пройдена!";
+    }
+  </script>
+</head>
+<body style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+  <h2>Підтвердіть, що ви не робот</h2>
+  <form>
+    <button
+      class="g-recaptcha"
+      data-sitekey="6LdpkzYrAAAAAIzsLJieGkxP9fqo4Tt-FCzydBnb"
+      data-callback="onSubmit"
+      data-action="submit"
+    >
+      Підтвердити
+    </button>
+  </form>
+  <p id="status"></p>
+</body>
+</html>
