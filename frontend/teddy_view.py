@@ -327,6 +327,12 @@ class TeddyAI:
                 self.audio_file_path = str(tmp_path)
 
                 return True, None  # Return “success” and None as no error
+            
+            if response.status_code == 401:
+                self.status_text.value = "⚠️ Сесія завершена. Повторний вхід..."
+                self.page.update()
+                asyncio.run(self.auto_logout_and_login())
+                return False, "Необхідна повторна авторизація"
 
             else:
                 # Generate the error message
@@ -395,6 +401,28 @@ class TeddyAI:
                     json.dump(data, f)
         except Exception as ex:
             print(f"Помилка при видаленні токена: {ex}")
+
+    async def auto_logout_and_login(self):
+        try:
+            # Видаляємо токен
+            if CONFIG_FILE.exists():
+                with open(CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+                data.pop("jwt_token", None)
+                with open(CONFIG_FILE, "w") as f:
+                    json.dump(data, f)
+
+            # Повертаємось до екрана входу
+            await asyncio.sleep(1)
+            self.page.clean()
+            from login_view import LoginView
+            LoginView(
+                self.page,
+                on_login_success=lambda: TeddyAI(self.page, jwt_token=""),
+                server_url=FLASK_SERVER_URL
+            )
+        except Exception as ex:
+            print(f"Помилка при auto-logout: {ex}")
 
     # Return to login page
         self.page.clean()
