@@ -36,7 +36,8 @@ flet run main.py -d
 
 ```
 SERVER_URL=http://127.0.0.1:5000
-JWT_SECRET=your_very_secret_key
+JWT_SECRET=your_very_secret_key # Щоб створити ключ використайте наступну команду (необхідний NodeJS):
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ---

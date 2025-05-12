@@ -12,8 +12,8 @@ import openai
 import os
 import uuid
 
-# ========== Налаштування ==========
-load_dotenv()
+# ========== Settings ==========
+load_dotenv("../.env")
 
 app = Flask(__name__)
 CORS(app)
@@ -21,14 +21,14 @@ CORS(app)
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 
-# Підключення до SQLite
+# Connection to SQLite
 DATABASE_URL = "sqlite:///users.db"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
 profanity.load_censor_words_from_file("../.wordlist/banword_list.txt")
 
-# ========== Роутери ==========
+# ========== Routers ==========
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -82,7 +82,7 @@ def ask():
     data = request.get_json()
     question = data.get("question", "").strip()
     
-    # Отримуємо ключ з заголовка
+    # Get the key from the header
     api_key = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
     if not api_key:
         return jsonify({"error": "API ключ не вказано!"}), 401
@@ -108,7 +108,7 @@ def ask():
     except Exception as e:
         return jsonify({"error": f"GPT помилка: {str(e)}"}), 500
 
-    # Збереження історії
+    # Save history
     session = Session()
     user = session.query(User).filter_by(email=email).first()
     if user:
@@ -117,7 +117,7 @@ def ask():
         session.commit()
     session.close()
 
-    # Генерація MP3
+    # Generate MP3
     try:
         tts = gTTS(answer, lang="uk")
         filename = f"response_{uuid.uuid4()}.mp3"
@@ -151,6 +151,6 @@ def history():
     return jsonify({"history": history_data})
 
 
-# ========== Запуск ==========
+# ========== Start ==========
 if __name__ == "__main__":
     app.run(debug=True)

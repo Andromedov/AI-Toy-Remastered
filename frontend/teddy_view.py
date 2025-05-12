@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 timestamp = datetime.now().strftime("%H:%M:%S")
 
-load_dotenv()
+load_dotenv("../.env")
 CONFIG_FILE = Path(".config.json")
 FLASK_SERVER_URL = os.getenv("SERVER_URL")
 

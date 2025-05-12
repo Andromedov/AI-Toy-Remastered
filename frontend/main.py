@@ -7,7 +7,7 @@ from teddy_view import TeddyAI
 from login_view import LoginView
 
 # Завантаження .env
-load_dotenv()
+load_dotenv("../.env")
 CONFIG_FILE = Path("./.config.json")
 FLASK_SERVER_URL = os.getenv("SERVER_URL")
 
