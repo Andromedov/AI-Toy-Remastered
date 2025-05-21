@@ -10,7 +10,7 @@ from utils import hash_password, check_password
 from gtts import gTTS
 from better_profanity import profanity
 from dotenv import load_dotenv
-from encryption import encrypt_api_key, decrypt_api_key
+from backend.encryption import encrypt_api_key, decrypt_api_key
 from datetime import timedelta
 import openai
 import os

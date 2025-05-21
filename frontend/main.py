@@ -3,8 +3,8 @@ import flet as ft
 import os
 import json
 from pathlib import Path
-from teddy_view import TeddyAI
-from login_view import LoginView
+from frontend.teddy_view import TeddyAI
+from frontend.login_view import LoginView
 
 # Завантаження .env
 load_dotenv("../.env")

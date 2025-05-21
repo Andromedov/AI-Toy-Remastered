@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from models import Base
+from backend.models import Base
 
 # Path to SQLite file
 DATABASE_URL = "sqlite:///users.db"

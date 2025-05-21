@@ -1,8 +1,8 @@
 import pytest
+from flask.testing import FlaskClient
 from backend.app import app
-from fastapi.testclient import TestClient
 
-client = TestClient(app)
+client = app.test_client()
 
 def test_root_route():
     response = client.get("/")
