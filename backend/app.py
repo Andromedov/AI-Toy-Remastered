@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from gtts import gTTS
 from better_profanity import profanity
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from backend.encryption import encrypt_api_key, decrypt_api_key
 from backend.models import Base, User, MessageHistory
 from backend.utils import hash_password, check_password
@@ -17,7 +17,7 @@ import os
 import uuid
 
 # ========== Settings ==========
-load_dotenv("../.env")
+load_dotenv(find_dotenv())
 
 app = Flask(__name__)
 CORS(app)

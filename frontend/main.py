@@ -1,4 +1,4 @@
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import flet as ft
 import os
 import json
@@ -7,7 +7,7 @@ from frontend.teddy_view import TeddyAI
 from frontend.login_view import LoginView
 
 # Завантаження .env
-load_dotenv("../.env")
+load_dotenv(find_dotenv())
 CONFIG_FILE = Path("./.config.json")
 FLASK_SERVER_URL = os.getenv("SERVER_URL")
 

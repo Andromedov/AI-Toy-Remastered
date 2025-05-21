@@ -8,12 +8,12 @@ import platform
 import subprocess
 from pathlib import Path
 from datetime import datetime
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from cryptography.fernet import Fernet
 
 timestamp = datetime.now().strftime("%H:%M:%S")
 
-load_dotenv("../.env")
+load_dotenv(find_dotenv())
 CONFIG_FILE = Path(".config.json")
 FERNET_FILE = Path(".fernet.key")
 FLASK_SERVER_URL = os.getenv("SERVER_URL")

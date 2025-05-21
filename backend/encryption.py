@@ -1,8 +1,8 @@
 from cryptography.fernet import Fernet
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv("../.env")
+load_dotenv(find_dotenv())
 
 ENCRYPTION_SECRET = os.getenv("ENCRYPTION_SECRET")
 if not ENCRYPTION_SECRET:
