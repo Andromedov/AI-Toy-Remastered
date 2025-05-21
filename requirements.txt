@@ -11,3 +11,4 @@ gtts
 better_profanity
 cryptography
 pyperclip
+openai

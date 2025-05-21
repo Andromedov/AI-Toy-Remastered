@@ -33,12 +33,10 @@ jobs:
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "ENCRYPTION_SECRET=${{ secrets.ENCRYPTION_SECRET }}" >> .env
 
-      - name: Debug sys.path
-        run: python -c "import sys; print('\n'.join(sys.path))"
-
       - name: Run tests
         run: |
           pytest
+          ls -l coverage.json
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
