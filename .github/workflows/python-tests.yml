@@ -27,9 +27,9 @@ jobs:
       - name: Run tests
         env:
           PYTHONPATH: .
-          SERVER_URL: ${{ secrets.SERVER_URL }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-          ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+          SERVER_URL: ${{ secrets.GITHUB_TOKEN.SERVER_URL }}
+          JWT_SECRET_KEY: ${{ secrets.GITHUB_TOKEN.JWT_SECRET_KEY }}
+          ENCRYPTION_SECRET: ${{ secrets.GITHUB_TOKEN.ENCRYPTION_SECRET }}
         run: |
           pytest
 
