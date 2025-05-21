@@ -17,18 +17,24 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-
+          
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov
+          
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
 
       - name: Create .env file
         run: |
           echo "SERVER_URL=${{ secrets.GITHUB_TOKEN.SERVER_URL }}" >> .env
           echo "JWT_SECRET_KEY=${{ secrets.GITHUB_TOKEN.JWT_SECRET_KEY }}" >> .env
           echo "ENCRYPTION_SECRET=${{ secrets.GITHUB_TOKEN.ENCRYPTION_SECRET }}" >> .env
+
+      - name: Debug sys.path
+        run: python -c "import sys; print('\n'.join(sys.path))"
 
       - name: Run tests
         run: |
