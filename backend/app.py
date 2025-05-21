@@ -5,12 +5,12 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, User, MessageHistory
-from utils import hash_password, check_password
 from gtts import gTTS
 from better_profanity import profanity
 from dotenv import load_dotenv
 from backend.encryption import encrypt_api_key, decrypt_api_key
+from backend.models import Base, User, MessageHistory
+from backend.utils import hash_password, check_password
 from datetime import timedelta
 import openai
 import os

@@ -24,12 +24,13 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
+      - name: Create .env file
+        run: |
+          echo "SERVER_URL=${{ secrets.GITHUB_TOKEN.SERVER_URL }}" >> .env
+          echo "JWT_SECRET_KEY=${{ secrets.GITHUB_TOKEN.JWT_SECRET_KEY }}" >> .env
+          echo "ENCRYPTION_SECRET=${{ secrets.GITHUB_TOKEN.ENCRYPTION_SECRET }}" >> .env
+
       - name: Run tests
-        env:
-          PYTHONPATH: ${{ github.workspace }}
-          SERVER_URL: ${{ secrets.GITHUB_TOKEN.SERVER_URL }}
-          JWT_SECRET_KEY: ${{ secrets.GITHUB_TOKEN.JWT_SECRET_KEY }}
-          ENCRYPTION_SECRET: ${{ secrets.GITHUB_TOKEN.ENCRYPTION_SECRET }}
         run: |
           pytest
 
