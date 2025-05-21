@@ -1,9 +1,9 @@
 flet
 requests
 flask
-flask-jwt-extended
-flask-cors
-flask-limiter
+flask_jwt_extended
+flask_cors
+flask_limiter
 python-dotenv
 sqlalchemy
 bcrypt
@@ -11,3 +11,11 @@ gtts
 better_profanity
 cryptography
 pyperclip
+os
+json
+tempfile
+asyncio
+platform
+subprocess
+pathlib
+datetime
