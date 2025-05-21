@@ -46,7 +46,7 @@ flet run main.py -d
 # ⬇️ or other URL for server
 SERVER_URL=http://127.0.0.1:5000
 # ⬇️ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-JWT_SECRET=your_very_secret_key
+JWT_SECRET_KEY=your_very_secret_key
 # ⬇️ python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ENCRYPTION_SECRET=your_encryption_secret_key_here
 ```
