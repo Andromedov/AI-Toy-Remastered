@@ -32,7 +32,11 @@ DATABASE_URL = "sqlite:///users.db"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
-profanity.load_censor_words_from_file("../.wordlist/banword_list.txt")
+banwords_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.wordlist', 'banword_list.txt'))
+if os.path.exists(banwords_path):
+    profanity.load_censor_words_from_file(banwords_path)
+else:
+    print(f"Banword list is not found at {banwords_path}")
 
 # ========== Save API Key to DB ==========
 
