@@ -41,11 +41,11 @@ class TeddyAI:
         
         # Adaptive customization depending on the platform
         if self.page.platform == "android":
-            self.page.window_width = self.page.width
-            self.page.window_height = self.page.height
+            self.page.window.width = self.page.width
+            self.page.window.height = self.page.height
         else:
-            self.page.window_width = 500
-            self.page.window_height = 650
+            self.page.window.width = 500
+            self.page.window.height = 650
         
     def load_components(self):
         # Loading a saved API key

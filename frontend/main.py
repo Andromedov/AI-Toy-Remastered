@@ -13,8 +13,8 @@ FLASK_SERVER_URL = os.getenv("SERVER_URL")
 
 def main(page: ft.Page):
     page.title = "TeddyAI"
-    page.window_width = 500
-    page.window_height = 650
+    page.window.width = 500
+    page.window.height = 650
     page.theme_mode = ft.ThemeMode.SYSTEM
 
     # Callback after login

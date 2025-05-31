@@ -27,16 +27,14 @@ chmod +x install.sh
 ### 🌐 Backend (Flask)
 
 ```bash
-cd backend
 venv\Scripts\activate  # Linux/macOS: source venv/bin/activate
-python ./app.py
+python -m backend.app
 ```
 
 ### 🎨 Frontend (Flet)
 
 ```bash
-cd frontend
-flet run main.py -d
+python -m frontend.main
 ```
 
 > **Примітка:** створіть файл `.env`, або ж створіть його за допомогою `install` файлу:
