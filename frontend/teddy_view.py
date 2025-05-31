@@ -380,15 +380,6 @@ class TeddyAI:
                 self.show_snackbar(f"Помилка відтворення: {ex}")
         self.page.update()
 
-    # TODO: Fix pause and stop audio players
-    def pause_audio(self, _):
-        self.show_snackbar("Керуйте відтворенням у системному плеєрі")
-        self.page.update()
-    
-    def stop_audio(self, _):
-        self.show_snackbar("Керуйте відтворенням у системному плеєрі")
-        self.page.update()
-
     def show_login_view(self):
         from login_view import LoginView
         self.page.clean()
