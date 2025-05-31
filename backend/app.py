@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -28,7 +29,7 @@ app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 jwt = JWTManager(app)
 
 # Connection to SQLite
-DATABASE_URL = "sqlite:///users.db"
+DATABASE_URL = "sqlite:///backend/users.db"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
@@ -206,6 +207,9 @@ def history():
     session.close()
     return jsonify({"history": history_data})
 
+@jwt.unauthorized_loader
+def unauthorized_response(callback):
+    return jsonify({"error": "Недійсний або відсутній токен доступу"}), 401
 
 # ========== Start ==========
 if __name__ == "__main__":

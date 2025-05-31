@@ -125,7 +125,10 @@ class TeddyAI:
             on_click=self.send_question,
             style=ft.ButtonStyle(
                 shape=ft.RoundedRectangleBorder(radius=8),
-                bgcolor=ft.Colors.BLUE_600
+                bgcolor=ft.Colors.BLUE_400,
+                color=ft.Colors.WHITE,
+                overlay_color=ft.Colors.BLUE_100,
+                shadow_color=ft.Colors.BLUE_900
             )
         )
         
@@ -381,7 +384,7 @@ class TeddyAI:
         self.page.update()
 
     def show_login_view(self):
-        from login_view import LoginView
+        from frontend.login_view import LoginView
         self.page.clean()
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
