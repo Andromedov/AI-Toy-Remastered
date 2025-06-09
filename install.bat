@@ -9,7 +9,7 @@ call venv\Scripts\activate
 
 IF NOT EXIST .env (
     echo Creating .env file...
-    echo '# === TeddyAI Environment ===' >> .env
+    echo '# === Environment File ===' >> .env
     echo '# ⬇️ or other URL for server' >> .env
     echo 'SERVER_URL=http://127.0.0.1:5000' >> .env
     echo '# ⬇️ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"' >> .env

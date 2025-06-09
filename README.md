@@ -27,20 +27,21 @@ chmod +x install.sh
 ### 🌐 Backend (Flask)
 
 ```bash
-venv\Scripts\activate  # Linux/macOS: source venv/bin/activate
+.\venv\Scripts\activate  # Linux/macOS: source venv/bin/activate
 python -m backend.app
 ```
 
 ### 🎨 Frontend (Flet)
 
 ```bash
+.\venv\Scripts\activate  # Linux/macOS: source venv/bin/activate
 python -m frontend.main
 ```
 
 > **Примітка:** створіть файл `.env`, або ж створіть його за допомогою `install` файлу:
 
 ```
-# === TeddyAI Environment ===
+# === Environment File ===
 # ⬇️ or other URL for server
 SERVER_URL=http://127.0.0.1:5000
 # ⬇️ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
@@ -66,12 +67,14 @@ ENCRYPTION_SECRET=your_encryption_secret_key_here
 ```
 └── Andromedov/AI-Toy-Remastered/
     ├── backend/
+    │   ├── __init__.py
     │   ├── app.py
     │   ├── db_setup.py
     │   ├── encryption.py
     │   ├── models.py
     │   └── utils.py
     ├── frontend/
+    │   ├── __init__.py
     │   ├── login_view.py
     │   ├── main.py
     │   └── teddy_view.py
@@ -94,12 +97,12 @@ ENCRYPTION_SECRET=your_encryption_secret_key_here
 * [ ] Збереження історії на сервері + відображення в інтерфейсі
 * [ ] Мобільна версія як APK (Flet + Android Studio)
 * [ ] Розширення TTS/ASR можливостей
-* [ ] Підключення до бази даних SQLite або MySQL (MariaDB)
+* [x] Підключення до бази даних SQLite або MySQL (MariaDB)
 
 ---
 
 ## 🚀 Автор
 
-**Yevhen «Andromedov» Harasymchuk** — дипломний проєкт, 2025
+**Yevhen «Andromedov» Harasymchuk** — кваліфікаційна робота, 2025
 
 > Якщо виникли проблеми — звертайтайтесь у `issues`.
