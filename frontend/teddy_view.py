@@ -80,6 +80,35 @@ class TeddyAI:
             prefix_icon=ft.Icons.KEY
         )
         
+        saved_ssid, saved_wifi_password = self.load_wifi_credentials()
+
+        self.ssid_field = ft.TextField(
+            label="WiFi SSID",
+            value=saved_ssid,
+            expand=True,
+            border=ft.InputBorder.UNDERLINE,
+            prefix_icon=ft.Icons.WIFI
+        )
+
+        self.wifi_password_field = ft.TextField(
+            label="WiFi Пароль",
+            value=saved_wifi_password,
+            password=True,
+            can_reveal_password=True,
+            expand=True,
+            border=ft.InputBorder.UNDERLINE,
+            prefix_icon=ft.Icons.LOCK
+        )
+
+
+        self.save_wifi_btn = ft.IconButton(
+            icon=ft.Icons.SAVE_ALT,
+            tooltip="Зберегти WiFi",
+            on_click=self.save_wifi
+        )
+
+        self.load_wifi_from_server()
+        
         self.question_field = ft.TextField(
             label="Питання до GPT",
             multiline=True,
@@ -153,6 +182,14 @@ class TeddyAI:
                         ]),
                         padding=ft.Padding(10, 10, 10, 10)
                     ),
+
+                    ft.Container(
+                        content=ft.Column([
+                            ft.Text("Налаштування WiFi", weight=ft.FontWeight.BOLD),
+                            ft.Row([self.ssid_field, self.wifi_password_field, self.save_wifi_btn])
+                        ]),
+                        padding=ft.Padding(10, 10, 10, 10)
+                    ),
                     
                     ft.Container(
                         content=ft.Column([
@@ -185,9 +222,100 @@ class TeddyAI:
                 padding=ft.Padding(10, 10, 10, 10),
                 border_radius=10,
             ),
-            # Removed link to audio player
         )
-        
+    
+    def load_wifi_credentials(self):
+        try:
+            if CONFIG_FILE.exists():
+                with open(CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+                    fernet = get_fernet()
+                    ssid_enc = data.get("wifi_ssid", "")
+                    pw_enc = data.get("wifi_password", "")
+                    ssid = fernet.decrypt(ssid_enc.encode()).decode() if ssid_enc else ""
+                    password = fernet.decrypt(pw_enc.encode()).decode() if pw_enc else ""
+                    return ssid, password
+        except Exception as e:
+            print(f"Помилка завантаження WiFi: {e}")
+        return "", ""
+    
+    def load_wifi_from_server(self):
+        try:
+            resp = requests.get(
+                f"{FLASK_SERVER_URL}/get_wifi",
+                headers={"Authorization": f"Bearer {self.jwt_token}"},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                ssid = data.get("ssid", "")
+                password = data.get("password", "")
+                if ssid and password:
+                    fernet = get_fernet()
+                    ssid_enc = fernet.encrypt(ssid.encode()).decode()
+                    pw_enc = fernet.encrypt(password.encode()).decode()
+
+                    if CONFIG_FILE.exists():
+                        with open(CONFIG_FILE, "r") as f:
+                            config = json.load(f)
+                    else:
+                        config = {}
+
+                    config["wifi_ssid"] = ssid_enc
+                    config["wifi_password"] = pw_enc
+
+                    with open(CONFIG_FILE, "w") as f:
+                        json.dump(config, f)
+
+                    self.ssid_field.value = ssid
+                    self.wifi_password_field.value = password
+                    self.page.update()
+        except Exception as e:
+            print(f"❌ Помилка завантаження WiFi з сервера: {e}")
+
+    def save_wifi(self, e):
+        asyncio.run(self._save_wifi_async())
+
+    async def _save_wifi_async(self):
+        ssid = self.ssid_field.value.strip()
+        password = self.wifi_password_field.value.strip()
+
+        if not ssid or not password:
+            self.show_snackbar("❗ Введіть SSID і пароль WiFi")
+            return
+
+        try:
+            fernet = get_fernet()
+            ssid_enc = fernet.encrypt(ssid.encode()).decode()
+            pw_enc = fernet.encrypt(password.encode()).decode()
+
+            # Save locally
+            if CONFIG_FILE.exists():
+                with open(CONFIG_FILE, "r") as f:
+                    data = json.load(f)
+            else:
+                data = {}
+
+            data["wifi_ssid"] = ssid_enc
+            data["wifi_password"] = pw_enc
+
+            with open(CONFIG_FILE, "w") as f:
+                json.dump(data, f)
+
+            # Save to backend
+            resp = requests.post(
+                f"{FLASK_SERVER_URL}/save_wifi",
+                headers={"Authorization": f"Bearer {self.jwt_token}"},
+                json={"ssid": ssid, "password": password},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                self.show_snackbar("📶 WiFi збережено!")
+            else:
+                self.show_snackbar("❌ Не вдалося зберегти WiFi")
+        except Exception as e:
+            self.show_snackbar(f"❌ Помилка: {e}")
+
     def load_api_key(self):
         try:
             if CONFIG_FILE.exists():

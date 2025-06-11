@@ -12,6 +12,9 @@ class User(Base):
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(128), nullable=False)
     api_key_encrypted = Column(Text, nullable=True)
+    wifi_ssid_encrypted = Column(Text, nullable=True)
+    wifi_password_encrypted = Column(Text, nullable=True)
+
 
     history = relationship("MessageHistory", back_populates="user")
 

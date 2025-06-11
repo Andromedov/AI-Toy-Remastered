@@ -131,6 +131,47 @@ def login():
     session.close()
     return jsonify({"token": token})
 
+@app.route("/save_wifi", methods=["POST"])
+@jwt_required()
+def save_wifi():
+    email = get_jwt_identity()
+    data = request.get_json()
+    ssid = data.get("ssid", "").strip()
+    password = data.get("password", "").strip()
+
+    if not ssid or not password:
+        return jsonify({"error": "SSID і пароль обов’язкові"}), 400
+
+    encrypted_ssid = encrypt_api_key(ssid)
+    encrypted_password = encrypt_api_key(password)
+
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+    if user:
+        user.wifi_ssid_encrypted = encrypted_ssid
+        user.wifi_password_encrypted = encrypted_password
+        session.commit()
+    session.close()
+
+    return jsonify({"message": "WiFi налаштування збережено"}), 200
+
+@app.route("/get_wifi", methods=["GET"])
+@jwt_required()
+def get_wifi():
+    email = get_jwt_identity()
+    session = Session()
+    user = session.query(User).filter_by(email=email).first()
+
+    if not user or not user.wifi_ssid_encrypted or not user.wifi_password_encrypted:
+        session.close()
+        return jsonify({"ssid": "", "password": ""}), 200
+
+    ssid = decrypt_api_key(user.wifi_ssid_encrypted)
+    password = decrypt_api_key(user.wifi_password_encrypted)
+    session.close()
+
+    return jsonify({"ssid": ssid, "password": password}), 200
+
 
 @app.route("/ask", methods=["POST"])
 @jwt_required()
