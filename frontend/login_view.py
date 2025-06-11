@@ -100,15 +100,20 @@ class LoginView:
                 key = ""
                 try:
                     key_resp = requests.get(
-                        f"{self.server_url}/api-key",
+                        f"{self.server_url}/get_credentials",
                         headers={"Authorization": f"Bearer {token}"}
                     )
                     if key_resp.status_code == 200:
-                        key = key_resp.json().get("api_key", "")
+                        creds = key_resp.json()
+                        key = creds.get("api_key", "")
+                        wifi_name = creds.get("wifi_ssid", "")
+                        wifi_pass = creds.get("wifi_password", "")
+                    else:
+                        print("⚠️ /get_credentials повернув помилку:", key_resp.status_code, key_resp.text)
                 except Exception as ex:
-                    print("⚠️ Не вдалося отримати ключ:", ex)
+                    print("⚠️ Не вдалося отримати credentials з сервера:", ex)
                     
-                self.save_config(email=email, jwt=token, api_key=key)
+                self.save_config(email=email, jwt=token, api_key=key, wifi_ssid=wifi_name, wifi_password=wifi_pass)
                 self.status_text.value = "✅ Успішний вхід!"
                 self.page.clean()
                 self.on_login_success()
@@ -119,7 +124,7 @@ class LoginView:
 
         self.page.update()
 
-    def save_config(self, email, jwt, api_key=None):
+    def save_config(self, email, jwt, api_key=None, wifi_ssid=None, wifi_password=None):
         try:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
@@ -132,6 +137,12 @@ class LoginView:
             if api_key:
                 fernet = get_fernet()
                 data["api_key"] = fernet.encrypt(api_key.encode()).decode()
+            if wifi_ssid:
+                fernet = get_fernet()
+                data["wifi_ssid"] = fernet.encrypt(wifi_ssid.encode()).decode()
+            if wifi_password:
+                fernet = get_fernet()
+                data["wifi_password"] = fernet.encrypt(wifi_password.encode()).decode()
 
             with open(CONFIG_FILE, "w") as f:
                 json.dump(data, f)

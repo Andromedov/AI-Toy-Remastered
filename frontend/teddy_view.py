@@ -106,8 +106,6 @@ class TeddyAI:
             tooltip="Зберегти WiFi",
             on_click=self.save_wifi
         )
-
-        self.load_wifi_from_server()
         
         self.question_field = ft.TextField(
             label="Питання до GPT",
@@ -229,49 +227,15 @@ class TeddyAI:
             if CONFIG_FILE.exists():
                 with open(CONFIG_FILE, "r") as f:
                     data = json.load(f)
-                    fernet = get_fernet()
-                    ssid_enc = data.get("wifi_ssid", "")
-                    pw_enc = data.get("wifi_password", "")
-                    ssid = fernet.decrypt(ssid_enc.encode()).decode() if ssid_enc else ""
-                    password = fernet.decrypt(pw_enc.encode()).decode() if pw_enc else ""
-                    return ssid, password
+                encrypted_wifi_ssid = data.get("wifi_ssid", "")
+                encrypted_wifi_password = data.get("wifi_password", "")
+                fernet = get_fernet()
+                ssid = fernet.decrypt(encrypted_wifi_ssid.encode()).decode() if encrypted_wifi_ssid else ""
+                password = fernet.decrypt(encrypted_wifi_password.encode()).decode() if encrypted_wifi_password else ""
+                return ssid, password
         except Exception as e:
             print(f"Помилка завантаження WiFi: {e}")
         return "", ""
-    
-    def load_wifi_from_server(self):
-        try:
-            resp = requests.get(
-                f"{FLASK_SERVER_URL}/get_wifi",
-                headers={"Authorization": f"Bearer {self.jwt_token}"},
-                timeout=10
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                ssid = data.get("ssid", "")
-                password = data.get("password", "")
-                if ssid and password:
-                    fernet = get_fernet()
-                    ssid_enc = fernet.encrypt(ssid.encode()).decode()
-                    pw_enc = fernet.encrypt(password.encode()).decode()
-
-                    if CONFIG_FILE.exists():
-                        with open(CONFIG_FILE, "r") as f:
-                            config = json.load(f)
-                    else:
-                        config = {}
-
-                    config["wifi_ssid"] = ssid_enc
-                    config["wifi_password"] = pw_enc
-
-                    with open(CONFIG_FILE, "w") as f:
-                        json.dump(config, f)
-
-                    self.ssid_field.value = ssid
-                    self.wifi_password_field.value = password
-                    self.page.update()
-        except Exception as e:
-            print(f"❌ Помилка завантаження WiFi з сервера: {e}")
 
     def save_wifi(self, e):
         asyncio.run(self._save_wifi_async())
