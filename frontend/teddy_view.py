@@ -140,7 +140,7 @@ class TeddyAI:
                         ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
                         self.logout_button
                     ]),
-                    ft.Text("Голосовий асистент на базі GPT", size=16, color=ft.Colors.BLUE_GREY_400),
+                    ft.Text("Програма налаштувань для інтерактивної іграшки", size=16, color=ft.Colors.BLUE_GREY_400),
                     ft.Divider(),
                     
                     ft.Container(
