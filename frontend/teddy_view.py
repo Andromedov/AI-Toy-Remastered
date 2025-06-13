@@ -244,8 +244,8 @@ class TeddyAI:
         ssid = self.ssid_field.value.strip()
         password = self.wifi_password_field.value.strip()
 
-        if not ssid or not password:
-            self.show_snackbar("❗ Введіть SSID і пароль WiFi")
+        if not ssid:
+            self.show_snackbar("❗ Введіть SSID")
             return
 
         try:

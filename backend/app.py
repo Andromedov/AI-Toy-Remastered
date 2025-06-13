@@ -69,8 +69,8 @@ def save_wifi():
     ssid = data.get("ssid", "").strip()
     password = data.get("password", "").strip()
 
-    if not ssid or not password:
-        return jsonify({"error": "SSID і пароль обов’язкові"}), 400
+    if not ssid:
+        return jsonify({"error": "SSID обов’язковий"}), 400
 
     encrypted_ssid = encrypt_api_key(ssid)
     encrypted_password = encrypt_api_key(password)
