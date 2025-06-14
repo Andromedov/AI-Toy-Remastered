@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime
 from dotenv import load_dotenv, find_dotenv
 from cryptography.fernet import Fernet
+from frontend.esp_config_view import ESPSetupView
 
 timestamp = datetime.now().strftime("%H:%M:%S")
 
@@ -69,6 +70,12 @@ class TeddyAI:
             visible=False
         )
 
+        self.setup_esp_btn = ft.ElevatedButton(
+            text="Налаштувати ESP32",
+            icon=ft.Icons.SETTINGS,
+            on_click=lambda _: self.open_esp_setup()
+        )
+
         # Creation of UI elements
         self.api_key_field = ft.TextField(
             label="OpenAI API Key",
@@ -78,33 +85,6 @@ class TeddyAI:
             expand=True,
             border=ft.InputBorder.UNDERLINE,
             prefix_icon=ft.Icons.KEY
-        )
-        
-        saved_ssid, saved_wifi_password = self.load_wifi_credentials()
-
-        self.ssid_field = ft.TextField(
-            label="WiFi SSID",
-            value=saved_ssid,
-            expand=True,
-            border=ft.InputBorder.UNDERLINE,
-            prefix_icon=ft.Icons.WIFI
-        )
-
-        self.wifi_password_field = ft.TextField(
-            label="WiFi Пароль",
-            value=saved_wifi_password,
-            password=True,
-            can_reveal_password=True,
-            expand=True,
-            border=ft.InputBorder.UNDERLINE,
-            prefix_icon=ft.Icons.LOCK
-        )
-
-
-        self.save_wifi_btn = ft.IconButton(
-            icon=ft.Icons.SAVE_ALT,
-            tooltip="Зберегти WiFi",
-            on_click=self.save_wifi
         )
         
         self.question_field = ft.TextField(
@@ -171,20 +151,18 @@ class TeddyAI:
                     ft.Divider(),
                     
                     ft.Container(
+                        content=ft.Row([self.setup_esp_btn]),
+                        alignment=ft.Alignment(0.0, 0.0),
+                        padding=10
+                    ),
+
+                    ft.Container(
                         content=ft.Column([
                             ft.Text("Налаштування API", weight=ft.FontWeight.BOLD),
                             ft.Row([
                                 self.api_key_field,
                                 self.save_key_btn
                             ]),
-                        ]),
-                        padding=ft.Padding(10, 10, 10, 10)
-                    ),
-
-                    ft.Container(
-                        content=ft.Column([
-                            ft.Text("Налаштування WiFi", weight=ft.FontWeight.BOLD),
-                            ft.Row([self.ssid_field, self.wifi_password_field, self.save_wifi_btn])
                         ]),
                         padding=ft.Padding(10, 10, 10, 10)
                     ),
@@ -221,64 +199,6 @@ class TeddyAI:
                 border_radius=10,
             ),
         )
-    
-    def load_wifi_credentials(self):
-        try:
-            if CONFIG_FILE.exists():
-                with open(CONFIG_FILE, "r") as f:
-                    data = json.load(f)
-                encrypted_wifi_ssid = data.get("wifi_ssid", "")
-                encrypted_wifi_password = data.get("wifi_password", "")
-                fernet = get_fernet()
-                ssid = fernet.decrypt(encrypted_wifi_ssid.encode()).decode() if encrypted_wifi_ssid else ""
-                password = fernet.decrypt(encrypted_wifi_password.encode()).decode() if encrypted_wifi_password else ""
-                return ssid, password
-        except Exception as e:
-            print(f"Помилка завантаження WiFi: {e}")
-        return "", ""
-
-    def save_wifi(self, e):
-        asyncio.run(self._save_wifi_async())
-
-    async def _save_wifi_async(self):
-        ssid = self.ssid_field.value.strip()
-        password = self.wifi_password_field.value.strip()
-
-        if not ssid:
-            self.show_snackbar("❗ Введіть SSID")
-            return
-
-        try:
-            fernet = get_fernet()
-            ssid_enc = fernet.encrypt(ssid.encode()).decode()
-            pw_enc = fernet.encrypt(password.encode()).decode()
-
-            # Save locally
-            if CONFIG_FILE.exists():
-                with open(CONFIG_FILE, "r") as f:
-                    data = json.load(f)
-            else:
-                data = {}
-
-            data["wifi_ssid"] = ssid_enc
-            data["wifi_password"] = pw_enc
-
-            with open(CONFIG_FILE, "w") as f:
-                json.dump(data, f)
-
-            # Save to backend
-            resp = requests.post(
-                f"{FLASK_SERVER_URL}/save_wifi",
-                headers={"Authorization": f"Bearer {self.jwt_token}"},
-                json={"ssid": ssid, "password": password},
-                timeout=10
-            )
-            if resp.status_code == 200:
-                self.show_snackbar("📶 WiFi збережено!")
-            else:
-                self.show_snackbar("❌ Не вдалося зберегти WiFi")
-        except Exception as e:
-            self.show_snackbar(f"❌ Помилка: {e}")
 
     def load_api_key(self):
         try:
@@ -447,6 +367,10 @@ class TeddyAI:
             # Other, unexpected errors
             return False, f"Непередбачена помилка: {e}"
     
+    def open_esp_setup(self):
+        self.page.clean()
+        ESPSetupView(self.page, on_back=lambda: TeddyAI(self.page, jwt_token=self.jwt_token))
+
     # TODO: Fix Snackbar if not work 
     def show_snackbar(self, message):
         self.page.snackbar = ft.SnackBar(
