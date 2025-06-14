@@ -13,9 +13,12 @@ from backend.encryption import encrypt_api_key, decrypt_api_key
 from backend.models import Base, User, MessageHistory
 from backend.utils import hash_password, check_password
 from datetime import timedelta
+import speech_recognition as sr
 import openai
+import wave
 import os
 import uuid
+import tempfile
 
 # ========== Settings ==========
 load_dotenv(find_dotenv())
@@ -161,6 +164,39 @@ def login():
     session.close()
     return jsonify({"token": token})
 
+
+@app.route("/upload_audio", methods=["POST"])
+@jwt_required()
+def upload_audio():
+    raw_data = request.data
+
+    if not raw_data:
+        return jsonify({"error": "Порожній аудіо-файл"}), 400
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as f:
+        filepath = f.name
+        with wave.open(f, 'wb') as wav_file:
+            wav_file.setnchannels(1)
+            wav_file.setsampwidth(2)
+            wav_file.setframerate(16000)
+            wav_file.writeframes(raw_data)
+
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(filepath) as source:
+        audio = recognizer.record(source)
+
+    try:
+        question = recognizer.recognize_google(audio, language="uk-UA")
+        print(f"🎤 Розпізнано: {question}")
+    except sr.UnknownValueError:
+        return jsonify({"error": "Не вдалося розпізнати мову"}), 400
+    except sr.RequestError as e:
+        return jsonify({"error": f"Speech API помилка: {e}"}), 500
+    with app.test_request_context():
+        req = request
+        req.headers = request.headers
+        req.json = lambda: {"question": question}
+        return ask()
 
 @app.route("/ask", methods=["POST"])
 @jwt_required()

@@ -16,3 +16,4 @@ users.db
 
 # simulation configuration file
 esp32/config.h
+esp32/old

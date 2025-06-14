@@ -12,3 +12,4 @@ better_profanity
 cryptography
 pyperclip
 openai
+SpeechRecognition
