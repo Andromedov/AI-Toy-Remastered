@@ -145,16 +145,11 @@ class TeddyAI:
                 content=ft.Column([
                     ft.Row([
                         ft.Text("TeddyAI", size=30, weight=ft.FontWeight.BOLD),
-                        self.logout_button
+                        self.logout_button,
+                        self.setup_esp_btn
                     ]),
                     ft.Text("Програма налаштувань для інтерактивної іграшки", size=16, color=ft.Colors.BLUE_GREY_400),
                     ft.Divider(),
-                    
-                    ft.Container(
-                        content=ft.Row([self.setup_esp_btn]),
-                        alignment=ft.Alignment(0.0, 0.0),
-                        padding=10
-                    ),
 
                     ft.Container(
                         content=ft.Column([
