@@ -36,7 +36,6 @@ class TeddyAI:
         
     def setup_page(self):
         self.page.title = "TeddyAI"
-        self.page.theme_mode = ft.ThemeMode.SYSTEM
         self.page.padding = 20
         self.page.scroll = ft.ScrollMode.AUTO
         
@@ -284,18 +283,18 @@ class TeddyAI:
             response_result, error_message = await asyncio.to_thread(self._make_request, question, api_key)
 
             if response_result == True:
-                self.status_text.value = "✅ Відповідь отримана"
+                self.status_text.value = "Відповідь отримана"
                 self.audio_controls.visible = True
                 self.enable_audio_controls(True)
             elif response_result == "unauthorized":
                 await self.auto_logout_and_login()
             else:
-                self.status_text.value = "❌ Не вдалося отримати відповідь"
+                self.status_text.value = "Не вдалося отримати відповідь"
                 if error_message:
                     self.show_snackbar(error_message)
                 
         except Exception as ex:
-            self.status_text.value = f"❌ Помилка: {ex}"
+            self.status_text.value = f"Помилка: {ex}"
             
         finally:
             # Remove progress
