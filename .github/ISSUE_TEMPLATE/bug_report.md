@@ -1,34 +1,33 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Let us know about a crash or bug.
 title: "[BUG] "
 labels: ''
 assignees: Andromedov
-
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the issue
+      description: |
+        A clear and concise description of what the problem is. 
+        What did you expect to happen? What happened instead? How can we reproduce the problem?
+    validations:
+      required: true
+  - type: input
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: If applicable, upload your logs to a paste website like https://www.toptal.com/developers/hastebin, and paste the link here.
+      placeholder: ex. https://hastebin.com/share/ihejenagob.rust
+    validations:
+      required: false
+  - type: textarea
+    id: extra
+    attributes:
+      label: Extra information
+      description: |
+        Feel free to add any additional info here. e.g. screenshots/videos, config files.
+    validations:
+      required: false
 ---
-
-**Describe the bug**
-A clear and concise description of what the bug is.
-
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
-
-**Desktop (please complete the following information):**
- - OS: [e.g. Windows 11]
-
-**Smartphone (please complete the following information):**
- - Device: [e.g. Samsung]
- - OS: [e.g. Android 13]
-
-**Additional context**
-Add any other context about the problem here.
